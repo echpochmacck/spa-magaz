@@ -175,4 +175,12 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     {
         return Yii::$app->security->validatePassword($password, $this->password);
     }
+
+
+
+    public function logout()
+    {
+       $this->token = null;
+       $this->save(false);
+    }
 }

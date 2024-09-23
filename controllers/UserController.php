@@ -76,9 +76,9 @@ class UserController extends \yii\rest\Controller
         $result = [];
         if ($model->validate()) {
             $model->register();
-            Yii::$app->response->statusCode = 200;
+            Yii::$app->response->statusCode = 201;
             $result[] = [
-                'code' => 200,
+                'code' => 201,
                 'data' => [
                     'token' => $model->token
                 ]
@@ -97,21 +97,21 @@ class UserController extends \yii\rest\Controller
     {
         $model = new User();
         $model->load(Yii::$app->request->post(), '');
-        $result = [];
         if ($model->validate()) {
             $user = User::findOne(['login' => $model->login]);
+
             if ($user && $user->valiadtePassword($model->password)) {
                 $user->setToken(true);
-                Yii::$app->response->statusCode = 200;
-                $result[] = [
-                    'code' => 200,
+                Yii::$app->response->statusCode = 201;
+                $result = [
+                    'code' => 201,
                     'data' => [
                         'token' => $user->token
                     ]
                 ];
             } else {
                 Yii::$app->response->statusCode = 401;
-                $result[] = [
+                $result = [
                     'code' => 422,
                     'errors' => 'Неправильный логин или пароль'
                 ];
@@ -123,6 +123,18 @@ class UserController extends \yii\rest\Controller
                 'errors' => $model->errors
             ];
         }
+        
         return $result;
     }
+
+
+    public function actionLogout()
+    {
+        $user = User::findOne(['token' => Yii::$app->user->identity->token]);
+        $user->logout();
+        Yii::$app->response->statusCode = 204;
+    }
+
+
+
 }

@@ -10,7 +10,7 @@ use Yii;
  * @property int $id
  * @property int $user_id
  *
- * @property Basket-sostav[] $basket-sostavs
+ * @property BasketSostav[] $basketSostavs
  * @property User $user
  */
 class Basket extends \yii\db\ActiveRecord
@@ -47,13 +47,13 @@ class Basket extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Basket-sostavs]].
+     * Gets query for [[BasketSostavs]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getBasket-sostavs()
+    public function getBasketSostavs()
     {
-        return $this->hasMany(Basket-sostav::class, ['basket_id' => 'id']);
+        return $this->hasMany(BasketSostav::class, ['basket_id' => 'id']);
     }
 
     /**
@@ -65,4 +65,6 @@ class Basket extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
+
+    
 }

@@ -84,6 +84,16 @@ $config = [
                 'OPTIONS api/user/register' => 'user/options',
                 'POST api/user/register' => 'user/register',
                 'POST api/user/login' => 'user/login',
+                'GET api/user/logout' => 'user/logout',
+
+                // получение товаров для главной страницы
+                'GET api/products' => 'product/get-product-list',
+
+
+                // получение списка заказов для пользователя
+                'GET api/orders' => 'orders/get-order-list',
+                'GET api/orders/<order_id>' => 'orders/get-order',
+
 
 
             ],

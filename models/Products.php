@@ -12,7 +12,7 @@ use Yii;
  * @property string $description
  * @property float $price
  *
- * @property Basket-sostav[] $basket-sostavs
+ * @property BasketSostav[] $basketSostavs
  * @property Sostav[] $sostavs
  */
 class Products extends \yii\db\ActiveRecord
@@ -52,13 +52,13 @@ class Products extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Basket-sostavs]].
+     * Gets query for [[BasketSostavs]].
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getBasket-sostavs()
+    public function getBasketSostavs()
     {
-        return $this->hasMany(Basket-sostav::class, ['product_id' => 'id']);
+        return $this->hasMany(BasketSostav::class, ['product_id' => 'id']);
     }
 
     /**
@@ -69,5 +69,14 @@ class Products extends \yii\db\ActiveRecord
     public function getSostavs()
     {
         return $this->hasMany(Sostav::class, ['product_id' => 'id']);
+    }
+
+    public static function getProducts()
+    {
+        $product = Products::find()
+            ->select('*')
+            ->asArray()
+            ->all();
+        return $product;
     }
 }

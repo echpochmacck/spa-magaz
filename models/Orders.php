@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 
 /**
  * This is the model class for table "orders".
@@ -74,4 +75,31 @@ class Orders extends \yii\db\ActiveRecord
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
+
+    public static function getOrders($id)
+    {
+        $query = Self::find()
+        ->select('*')
+        ->where(['user_id' => $id])
+        // ->asArray()
+        // ->all()
+         ;
+        // return  new ActiveDataProvider([
+        //     'query' => $query
+        // ]);
+        return $query 
+        ->asArray()
+        ->all()
+        ;
+    }
+    public function getOrderInfo()
+    {
+        return Sostav::find()
+                    ->select('*')
+                    ->where(['order_id' => $this->id])
+                    ->asArray()
+                    ->all()
+                    ;
+         
+    } 
 }
