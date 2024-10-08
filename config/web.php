@@ -88,11 +88,32 @@ $config = [
 
                 // получение товаров для главной страницы
                 'GET api/products' => 'product/get-product-list',
+                'GET api/product' => 'product/get-product-info',
 
 
                 // получение списка заказов для пользователя
                 'GET api/orders' => 'orders/get-order-list',
                 'GET api/orders/<order_id>' => 'orders/get-order',
+
+                // добавление товара в карзину
+                'OPTIONS api/order/basket' => 'orders/options',
+                'POST api/order/basket' => 'orders/basket',
+                'OPTIONS api/order/basket' => 'orders/options',
+                'POST api/order/basket/remove' => 'orders/remove-basket',
+
+                'GET api/order/make' => 'orders/make-order',
+
+
+                // админка
+                'GET api/admin/orders' => 'admin/get-orders',
+                'GET api/admin/order' => 'admin/get-order-info',
+
+
+
+
+
+
+
 
 
 
@@ -101,6 +122,8 @@ $config = [
 
     ],
     'params' => $params,
+
+    
 ];
 
 if (YII_ENV_DEV) {

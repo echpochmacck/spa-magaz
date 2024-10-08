@@ -79,4 +79,10 @@ class Products extends \yii\db\ActiveRecord
             ->all();
         return $product;
     }
+
+    // public static function getProduct($product_id)
+    // {
+    //     $product = Products::findOne($product_id);
+    //     return $product->attributes();
+    // }
 }

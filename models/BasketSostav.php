@@ -70,4 +70,14 @@ class BasketSostav extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Products::class, ['id' => 'product_id']);
     }
+
+    public static function getProducts($basket_id)
+    {
+        return Self::find()
+            ->select(['products.*', 'quantity'])
+            ->innerJoin('products', 'basketSostav.product_id = products.id')
+            ->where(['basket_id' => $basket_id])
+            ->asArray()
+            ->all();
+    }
 }

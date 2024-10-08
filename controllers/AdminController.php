@@ -2,18 +2,21 @@
 
 namespace app\controllers;
 
-use app\models\Products;
+use app\models\Orders;
 use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
 
-
-class ProductController extends \yii\rest\Controller
+class AdminController extends \yii\rest\Controller
 {
-
     public  $enableCsrfValidation = false;
     public  $modelClass  = '';
 
+
+    public function actionIndex()
+    {
+        return $this->render('index');
+    }
 
     public function behaviors()
     {
@@ -44,7 +47,7 @@ class ProductController extends \yii\rest\Controller
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-product-list'],
+            'only' => ['get-orders', 'get-order-info'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -65,40 +68,61 @@ class ProductController extends \yii\rest\Controller
 
         return $actions;
     }
-    public function actionIndex()
+    public function actionGetOrders()
     {
-        return $this->render('index');
-    }
-
-    public function actionGetProductList()
-    {
-
-        Yii::$app->response->statusCode = 200;
-        $result = [
-            'data' => Products::getProducts(),
-            'code' => 200
-        ];
-        return $result;
-    }
-
-
-    public function actionGetProductInfo($product_id)
-    {
-        // var_dump($product_id);die;  
-        $product = Products::findOne($product_id);
-        if ($product) {
+        $user = User::findOne(Yii::$app->user->identity->id);
+        if ($user->isAdmin) {
             Yii::$app->response->statusCode = 200;
             $result = [
-                'data' => $product->attributes,
-                'code' => 200
-            ];
+                'code' => 401,
+                'data' => [
+                    'orders' => Orders::getAllOrders()
+                ]
+                ];
         } else {
-            Yii::$app->response->statusCode = 404;
+
+            Yii::$app->response->statusCode = 401;
             $result = [
-                'code' => 404,
-                'error' => 'Not Found'
+                'code' => 401,
+                'error' => 'Prohibitted for you'
             ];
         }
         return $result;
     }
+
+    public function actionGetOrderInfo($order_id)
+    {
+        $user = User::findOne(Yii::$app->user->identity->id);
+        if ($user->isAdmin) {
+            $order = Orders::findOne($order_id);
+            if ($order) {
+                Yii::$app->response->statusCode = 200;
+                $result = [
+                    'code' => 401,
+                    'data' => [
+                        'order' => $order->attributes
+                    ]
+                    ];
+            } else {
+                Yii::$app->response->statusCode = 404;
+                $result = [
+                    'code' => 404,
+                    'error' => 'Not Found'
+                ];
+            }
+            
+        } else {
+
+            Yii::$app->response->statusCode = 401;
+            $result = [
+                'code' => 401,
+                'error' => 'Prohibitted for you'
+            ];
+        }
+        return $result;
+    }
+
+    
+
 }
+

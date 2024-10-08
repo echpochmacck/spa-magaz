@@ -79,27 +79,48 @@ class Orders extends \yii\db\ActiveRecord
     public static function getOrders($id)
     {
         $query = Self::find()
-        ->select('*')
-        ->where(['user_id' => $id])
-        // ->asArray()
-        // ->all()
-         ;
+            ->select('*')
+            ->where(['user_id' => $id])
+            // ->asArray()
+            // ->all()
+        ;
         // return  new ActiveDataProvider([
         //     'query' => $query
         // ]);
-        return $query 
-        ->asArray()
-        ->all()
+        return $query
+            ->asArray()
+            ->all()
         ;
     }
     public function getOrderInfo()
     {
         return Sostav::find()
-                    ->select('*')
-                    ->where(['order_id' => $this->id])
-                    ->asArray()
-                    ->all()
-                    ;
-         
-    } 
+            ->select('*')
+            ->where(['order_id' => $this->id])
+            ->asArray()
+            ->all()
+        ;
+    }
+
+    public static function getSum(array $arr)
+    {
+        $sum = 0;
+        foreach ($arr as $product) {
+            $sum += $product['quantity'] * $product['price'];
+        }
+        return $sum;
+    }
+
+    public static function getAllOrders()
+    {
+        return self::find()
+            ->select([
+                'orders.*',
+                'login',
+            ])
+            ->innerJoin('user', 'user.id = orders.user_id')
+            ->asArray()
+            ->all()
+        ;
+    }
 }

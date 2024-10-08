@@ -183,4 +183,10 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
        $this->token = null;
        $this->save(false);
     }
+
+
+    public function getIsAdmin()
+    {
+        return $this->role_id === Role::getRoleId('admin');
+    }
 }

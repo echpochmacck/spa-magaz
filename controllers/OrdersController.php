@@ -3,8 +3,10 @@
 namespace app\controllers;
 
 use app\models\Basket;
+use app\models\BasketSostav;
 use app\models\Orders;
 use app\models\Products;
+use app\models\Sostav;
 use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
@@ -49,7 +51,7 @@ class OrdersController extends \yii\rest\Controller
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-order-list', 'get-order'],
+            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -85,12 +87,11 @@ class OrdersController extends \yii\rest\Controller
 
     public function actionGetOrder($order_id)
     {
-        $order = Orders::findOne([$order_id])
-         ;
-         $result = [];
-         if ($order) {
+        $order = Orders::findOne([$order_id]);
+        $result = [];
+        if ($order) {
 
-             if (Yii::$app->user->identity->id === $order->user_id) {
+            if (Yii::$app->user->identity->id === $order->user_id) {
                 $products = $order->getOrderInfo();
                 Yii::$app->response->statusCode = 200;
                 $result = [
@@ -99,27 +100,124 @@ class OrdersController extends \yii\rest\Controller
                         'order' => $order->attributes,
                         'products' => $products
                     ]
-                    ];
-             } else {
-            Yii::$app->response->statusCode = 401;
+                ];
+            } else {
+                Yii::$app->response->statusCode = 401;
                 $result = [
                     'error' => 'Prohibitted for you',
                     'code' => 401
                 ];
-             }
-         } else {
+            }
+        } else {
             Yii::$app->response->statusCode = 404;
-         }
-         return $result;
+        }
+        return $result;
     }
 
 
-    // public function actionBasket()
-    // {
-    //     $data= Yii::$app->request->post();
-    //     $product = Products::findOne($data['product_id']);
-    //     if ($product) {
-    //         $basket = Basket::findOne(['user_id' => Yii::$app->user->identity->id]);
-    //     }
-    // }
+    public function actionBasket()
+    {
+        $data = Yii::$app->request->post();
+        $product = Products::findOne($data['product_id']);
+        if ($product) {
+            $basket = Basket::findOne(['user_id' => Yii::$app->user->identity->id]);
+            if (!$basket) {
+                $basket = new Basket();
+                $basket->user_id = Yii::$app->user->identity->id;
+                $basket->save();
+            }
+            $basketSostav = BasketSostav::findOne(['basket_id' => $basket->id, 'product_id' => $product->id]);
+            if (!$basketSostav) {
+                $basketSostav = new BasketSostav();
+                $basketSostav->basket_id = $basket->id;
+                $basketSostav->product_id = $product->id;
+            }
+            $basketSostav->quantity++;
+            $basketSostav->save(false);
+            $result = [
+                'code' => 200,
+                'data' => [
+                    'products' => BasketSostav::getProducts($basket->id)
+                ]
+            ];
+        } else {
+            $result = [
+                'code' => 404,
+                'error' => 'нет такого продукта'
+            ];
+        }
+        return $result;
+    }
+
+    public function actionRemoveBasket()
+    {
+        $data = Yii::$app->request->post();
+        $product = Products::findOne($data['product_id']);
+        $basket = Basket::findOne(['user_id' => Yii::$app->user->identity->id]);
+        $basketSostav = BasketSostav::findOne(['basket_id' => $basket->id, 'product_id' => $product->id]);
+        if ($product && $basket && $basketSostav) {
+            $basketSostav->quantity--;
+            if ($basketSostav->quantity <= 0) {
+                $basketSostav->delete();
+            } else {
+                $basketSostav->save(false);
+            }
+            $result = [
+                'code' => 200,
+                'data' => [
+                    'products' => BasketSostav::getProducts($basket->id)
+                ]
+            ];
+        } else {
+            $result = [
+                'code' => 404,
+                'error' => 'нет такого продукта'
+            ];
+        }
+        return $result;
+    }
+
+    public function actionMakeOrder()
+    {
+        $data = Yii::$app->request->post();
+        $user = User::findOne([Yii::$app->user->identity->id]);
+        $basket = Basket::findOne(['user_id' => $user->id]);
+        if ($basket) {
+            $products =  BasketSostav::getProducts($basket->id);
+            if (Yii::$app->user->identity->cash >= Orders::getSum($products)) {
+                $order = new Orders();
+                $order->user_id = $user->id;
+                $order->sum = Orders::getSum($products);
+                $order->status = 'В ожидании';
+                $order->save(false);
+                $user->cash = $user->cash - $order->sum;
+                $user->save(false);
+                foreach ($products as $product) {
+                    $model = new Sostav();
+                    $model->product_id = $product['id'];
+                    $model->quantity = $product['quantity'];
+                    $model->order_id = $order->id;
+                    $model->save(false);
+                }
+                $result = [
+                    'code' => 200,
+                ];
+            } else {
+                $result = [
+                    'code' => 401,
+                    'error' => 'не зватает кэша'
+                ];
+            }
+        } else {
+            $result = [
+                'code' => 404,
+                'error' => 'not found'
+            ];
+        }
+        return $result;
+    }
+
+
+
+    
 }
