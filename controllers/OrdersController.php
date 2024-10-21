@@ -41,9 +41,23 @@ class OrdersController extends \yii\rest\Controller
                 'Access-Control-Request-Headers' => ['Content-type', 'Authorization'],
             ],
             'actions' => [
-                'logout' => [
+                'get-order-list' => [
+                    'Access-Control-Allow-Credentials' => true,  // Разрешаем отправку учётных данных (например, cookies)
+                ],
+                'get-order' => [
                     'Access-Control-Allow-Credentials' => true,
-
+                ],
+                'basket' => [
+                    'Access-Control-Allow-Credentials' => true,
+                ],
+                'remove-basket' => [
+                    'Access-Control-Allow-Credentials' => true,
+                ],
+                'make-order' => [
+                    'Access-Control-Allow-Credentials' => true,
+                ],
+                'get-basket' => [
+                    'Access-Control-Allow-Credentials' => true,
                 ]
             ]
         ];
@@ -51,7 +65,7 @@ class OrdersController extends \yii\rest\Controller
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order'],
+            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order', 'get-basket'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -59,6 +73,17 @@ class OrdersController extends \yii\rest\Controller
 
         return $behaviors;
     }
+
+    public function actionOptions()
+    {
+        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        Yii::$app->response->headers->set('Access-Control-Allow-Credentials', 'true'); // если нужно отправлять куки или токен
+        Yii::$app->response->statusCode = 200;
+    }
+
+
 
     public function actions()
     {
@@ -199,13 +224,14 @@ class OrdersController extends \yii\rest\Controller
                     $model->order_id = $order->id;
                     $model->save(false);
                 }
+                $basket->delete();
                 $result = [
                     'code' => 200,
                 ];
             } else {
                 $result = [
                     'code' => 401,
-                    'error' => 'не зватает кэша'
+                    'errors' => 'не зватает кэша'
                 ];
             }
         } else {
@@ -217,7 +243,21 @@ class OrdersController extends \yii\rest\Controller
         return $result;
     }
 
+    public function actionGetBasket()
+    {
+        $basket = Basket::findOne(['user_id' => Yii::$app->user->identity->id]);
+        if ($basket) {
+            $result = [
+                'code' => 200,
+                'data' => ['products' => BasketSostav::getProducts($basket->id)]
+            ];
+        } else {
+            $result = [
+                'code' => 404,
+                'error' => 'not found'
+            ];
+        }
 
-
-    
+        return $result;
+    }
 }

@@ -31,10 +31,10 @@ class ProductController extends \yii\rest\Controller
                 // Allow only POST and PUT methods
                 'Access-Control-Request-Method' => ['POST', 'GET', 'OPTIONS'],
                 // Allow only headers 'X-Wsse'
-                'Access-Control-Request-Headers' => ['Content-type', 'Authorization'],
+                'Access-Control-Request-Headers' => ['Content-Type', 'Authorization'],
             ],
             'actions' => [
-                'logout' => [
+                'get-product-list' => [
                     'Access-Control-Allow-Credentials' => true,
 
                 ]
@@ -52,6 +52,17 @@ class ProductController extends \yii\rest\Controller
 
         return $behaviors;
     }
+
+
+    public function actionOptions()
+    {
+        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        Yii::$app->response->headers->set('Access-Control-Allow-Credentials', 'true'); // если нужно отправлять куки или токен
+        Yii::$app->response->statusCode = 200;
+    }
+    
 
     public function actions()
     {

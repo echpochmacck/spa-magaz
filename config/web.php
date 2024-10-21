@@ -83,11 +83,18 @@ $config = [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'user'],
                 'OPTIONS api/user/register' => 'user/options',
                 'POST api/user/register' => 'user/register',
+
+                // авторизация
+                'OPTIONS api/user/login' => 'user/options',
                 'POST api/user/login' => 'user/login',
+
+
                 'GET api/user/logout' => 'user/logout',
 
                 // получение товаров для главной страницы
+                'OPTIONS api/products' => 'product/options',
                 'GET api/products' => 'product/get-product-list',
+
                 'GET api/product' => 'product/get-product-info',
 
 
@@ -99,23 +106,25 @@ $config = [
                 'OPTIONS api/order/basket' => 'orders/options',
                 'POST api/order/basket' => 'orders/basket',
                 'OPTIONS api/order/basket' => 'orders/options',
+
+                // получение корзинф
+                'OPTIONS api/order/getBasket' => 'orders/options',
+                'GET api/order/getBasket' => 'orders/get-basket',
+
+                'OPTIONS api/order/basket/remove' => 'orders/options',
                 'POST api/order/basket/remove' => 'orders/remove-basket',
 
+                'OPTIONS api/order/make' => 'orders/options',
                 'GET api/order/make' => 'orders/make-order',
 
 
                 // админка
                 'GET api/admin/orders' => 'admin/get-orders',
                 'GET api/admin/order' => 'admin/get-order-info',
+                'PATCH api/admin/order' => 'admin/change-status',
 
 
-
-
-
-
-
-
-
+                
 
             ],
         ]
@@ -123,7 +132,7 @@ $config = [
     ],
     'params' => $params,
 
-    
+
 ];
 
 if (YII_ENV_DEV) {

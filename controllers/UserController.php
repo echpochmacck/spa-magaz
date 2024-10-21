@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
+use yii\filters\Cors;
 
 class UserController extends \yii\rest\Controller
 {
@@ -21,50 +22,47 @@ class UserController extends \yii\rest\Controller
     {
         $behaviors = parent::behaviors();
 
-        $auth = $behaviors['authenticator'];
-        unset($behaviors['authenticator']);
+        $auth = $behaviors["authenticator"];
+        unset($behaviors["authenticator"]);
 
-        // add CORS filter
-        $behaviors['corsFilter'] = [
-            'class' => \yii\filters\Cors::class,
-            'cors' => [
+        $behaviors["corsFilter"] = [
+            "class" => Cors::class,
+            "cors" => [
                 // restrict access to
-                'Origin' => [(isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'http://' . $_SERVER['REMOTE_ADDR'])],
-                // Allow only POST and PUT methods
-                'Access-Control-Request-Method' => ['POST', 'GET', 'OPTIONS'],
-                // Allow only headers 'X-Wsse'
-                'Access-Control-Request-Headers' => ['Content-type', 'Authorization'],
+                "Origin" => [(isset($_SERVER["HTTP_ORIGIN"]) ? $_SERVER["HTTP_ORIGIN"] : "http://" . $_SERVER["REMOTE_ADDR"])],
+                "Access-Control-Request-Method" => ["OPTIONS", "POST", "GET"],
+                "Access-Control-Request-Headers" => ["Content-Type", "Authorization"],
             ],
-            'actions' => [
-                'logout' => [
-                    'Access-Control-Allow-Credentials' => true,
-
-                ]
+            "actions" => [
+                "logout" => [
+                    "Access-Control-Allow-Credentials" => true,
+                ],
             ]
         ];
 
-
         $auth = [
-            'class' => HttpBearerAuth::class,
-            'only' => ['logout'],
+            "class" => HttpBearerAuth::class,
+            "only" => ["logout"]
         ];
-        // re-add authentication filter
-        $behaviors['authenticator'] = $auth;
-        // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)
 
+        $behaviors["authenticator"] = $auth;
+    
         return $behaviors;
+    }
+
+
+    public function actionOptions()
+    {
+        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        Yii::$app->response->statusCode = 200;
     }
 
     public function actions()
     {
         $actions = parent::actions();
-
-        // disable the "delete" and "create" actions
-        unset($actions['delete'], $actions['create']);
-
-        // customize the data provider preparation with the "prepareDataProvider()" method
-        $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
-
+        unset($actions["delete"], $actions["create"], $actions["index"], $actions["view"], $actions["update"]);
         return $actions;
     }
 
@@ -77,7 +75,7 @@ class UserController extends \yii\rest\Controller
         if ($model->validate()) {
             $model->register();
             Yii::$app->response->statusCode = 201;
-            $result[] = [
+            $result = [
                 'code' => 201,
                 'data' => [
                     'token' => $model->token
@@ -85,7 +83,7 @@ class UserController extends \yii\rest\Controller
             ];
         } else {
             Yii::$app->response->statusCode = 422;
-            $result[] = [
+            $result = [
                 'code' => 422,
                 'errors' => $model->errors
             ];
@@ -123,7 +121,7 @@ class UserController extends \yii\rest\Controller
                 'errors' => $model->errors
             ];
         }
-        
+
         return $result;
     }
 
@@ -134,11 +132,4 @@ class UserController extends \yii\rest\Controller
         $user->logout();
         Yii::$app->response->statusCode = 204;
     }
-
-
-
-
-    
-
 }
-

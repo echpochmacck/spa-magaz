@@ -47,7 +47,7 @@ class AdminController extends \yii\rest\Controller
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-orders', 'get-order-info'],
+            'only' => ['get-orders', 'get-order-info', 'change-status'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -122,6 +122,52 @@ class AdminController extends \yii\rest\Controller
         return $result;
     }
 
+
+    public function actionChangeStatus($order_id)
+    {
+        // var_dump(';dsd');die;
+        $user = User::findOne(Yii::$app->user->identity->id);
+        if ($user->isAdmin) {
+            $order = Orders::findOne($order_id);
+            if ($order) {
+                $data = Yii::$app->request->post();
+                $order->status = $data['status'];
+                if ($order->validate()) {
+                    $order->save(false);
+                    Yii::$app->response->statusCode = 200;
+                    $result = [
+                        'code' => 401,
+                        'data' => [
+                            'order' => $order->attributes
+                        ]
+                        ];
+                } else {
+                    Yii::$app->response->statusCode = 402;
+                    $result = [
+                        'code' => 402,
+                        'errors' => [
+                            $order->errors
+                        ]
+                        ];
+                }
+            } else {
+                Yii::$app->response->statusCode = 404;
+                $result = [
+                    'code' => 404,
+                    'error' => 'Not Found'
+                ];
+            }
+            
+        } else {
+
+            Yii::$app->response->statusCode = 401;
+            $result = [
+                'code' => 401,
+                'error' => 'Prohibitted for you'
+            ];
+        }
+        return $result;
+    }
     
 
 }
