@@ -7,7 +7,7 @@ use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
 
-class AdminController extends \yii\rest\Controller
+class AdminController extends \yii\rest\ActiveController
 {
     public  $enableCsrfValidation = false;
     public  $modelClass  = '';
@@ -37,7 +37,7 @@ class AdminController extends \yii\rest\Controller
                 'Access-Control-Request-Headers' => ['Content-type', 'Authorization'],
             ],
             'actions' => [
-                'logout' => [
+                'get-orders' => [
                     'Access-Control-Allow-Credentials' => true,
 
                 ]
@@ -75,10 +75,9 @@ class AdminController extends \yii\rest\Controller
             Yii::$app->response->statusCode = 200;
             $result = [
                 'code' => 401,
-                'data' => [
-                    'orders' => Orders::getAllOrders()
-                ]
-                ];
+                'data' =>  Orders::getAllOrders()
+
+            ];
         } else {
 
             Yii::$app->response->statusCode = 401;
@@ -102,7 +101,7 @@ class AdminController extends \yii\rest\Controller
                     'data' => [
                         'order' => $order->attributes
                     ]
-                    ];
+                ];
             } else {
                 Yii::$app->response->statusCode = 404;
                 $result = [
@@ -110,7 +109,6 @@ class AdminController extends \yii\rest\Controller
                     'error' => 'Not Found'
                 ];
             }
-            
         } else {
 
             Yii::$app->response->statusCode = 401;
@@ -140,7 +138,7 @@ class AdminController extends \yii\rest\Controller
                         'data' => [
                             'order' => $order->attributes
                         ]
-                        ];
+                    ];
                 } else {
                     Yii::$app->response->statusCode = 402;
                     $result = [
@@ -148,7 +146,7 @@ class AdminController extends \yii\rest\Controller
                         'errors' => [
                             $order->errors
                         ]
-                        ];
+                    ];
                 }
             } else {
                 Yii::$app->response->statusCode = 404;
@@ -157,7 +155,6 @@ class AdminController extends \yii\rest\Controller
                     'error' => 'Not Found'
                 ];
             }
-            
         } else {
 
             Yii::$app->response->statusCode = 401;
@@ -168,7 +165,4 @@ class AdminController extends \yii\rest\Controller
         }
         return $result;
     }
-    
-
 }
-

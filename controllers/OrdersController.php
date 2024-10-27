@@ -11,7 +11,7 @@ use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
 
-class OrdersController extends \yii\rest\Controller
+class OrdersController extends \yii\rest\ActiveController
 {
     public function actionIndex()
     {
@@ -74,15 +74,7 @@ class OrdersController extends \yii\rest\Controller
         return $behaviors;
     }
 
-    public function actionOptions()
-    {
-        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
-        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        Yii::$app->response->headers->set('Access-Control-Allow-Credentials', 'true'); // если нужно отправлять куки или токен
-        Yii::$app->response->statusCode = 200;
-    }
-
+    
 
 
     public function actions()
@@ -113,7 +105,7 @@ class OrdersController extends \yii\rest\Controller
     public function actionGetOrder($order_id)
     {
         $order = Orders::findOne([$order_id]);
-        $result = [];
+        // $result = [];
         if ($order) {
 
             if (Yii::$app->user->identity->id === $order->user_id) {

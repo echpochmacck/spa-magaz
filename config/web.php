@@ -88,6 +88,8 @@ $config = [
                 'OPTIONS api/user/login' => 'user/options',
                 'POST api/user/login' => 'user/login',
 
+                'OPTIONS api/user/info' => 'user/options',
+                'GET api/user/info' => 'user/user-info',
 
                 'GET api/user/logout' => 'user/logout',
 
@@ -100,7 +102,11 @@ $config = [
 
                 // получение списка заказов для пользователя
                 'GET api/orders' => 'orders/get-order-list',
+                'OPTIONS api/orders' => 'orders/options',
+
                 'GET api/orders/<order_id>' => 'orders/get-order',
+                'OPTIONS api/orders/<order_id>' => 'orders/options',
+
 
                 // добавление товара в карзину
                 'OPTIONS api/order/basket' => 'orders/options',
@@ -118,10 +124,15 @@ $config = [
                 'GET api/order/make' => 'orders/make-order',
 
 
+
                 // админка
                 'GET api/admin/orders' => 'admin/get-orders',
+                'OPTIONS api/admin/orders' => 'admin/options',
+
                 'GET api/admin/order' => 'admin/get-order-info',
                 'PATCH api/admin/order' => 'admin/change-status',
+                'OPTIONS api/admin/order' => 'admin/options',
+
 
 
                 

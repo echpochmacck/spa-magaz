@@ -7,7 +7,7 @@ use Yii;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\Cors;
 
-class UserController extends \yii\rest\Controller
+class UserController extends \yii\rest\ActiveController
 {
     public  $enableCsrfValidation = false;
     public  $modelClass  = '';
@@ -37,27 +37,30 @@ class UserController extends \yii\rest\Controller
                 "logout" => [
                     "Access-Control-Allow-Credentials" => true,
                 ],
+                'user-info' => [
+                    "Access-Control-Allow-Credentials" => true,
+                ]
             ]
         ];
 
         $auth = [
             "class" => HttpBearerAuth::class,
-            "only" => ["logout"]
+            "only" => ["logout", 'user-info']
         ];
 
         $behaviors["authenticator"] = $auth;
-    
+
         return $behaviors;
     }
 
 
-    public function actionOptions()
-    {
-        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
-        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        Yii::$app->response->statusCode = 200;
-    }
+    // public function actionOptions()
+    // {
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    //     Yii::$app->response->statusCode = 200;
+    // }
 
     public function actions()
     {
@@ -76,9 +79,11 @@ class UserController extends \yii\rest\Controller
             $model->register();
             Yii::$app->response->statusCode = 201;
             $result = [
-                'code' => 201,
+                'code' => 201,  
                 'data' => [
-                    'token' => $model->token
+                    'token' => $model->token,
+                    'isAdmin' => $model->isAdmin
+
                 ]
             ];
         } else {
@@ -104,7 +109,9 @@ class UserController extends \yii\rest\Controller
                 $result = [
                     'code' => 201,
                     'data' => [
-                        'token' => $user->token
+                        'token' => $user->token,
+                        'isAdmin' => $user->isAdmin
+
                     ]
                 ];
             } else {
@@ -131,5 +138,18 @@ class UserController extends \yii\rest\Controller
         $user = User::findOne(['token' => Yii::$app->user->identity->token]);
         $user->logout();
         Yii::$app->response->statusCode = 204;
+    }
+
+
+
+    public function actionUserInfo()
+    {
+        $user = User::findOne(['token' => Yii::$app->user->identity->token]);
+        // var_dump('asd');die;
+        $result = [
+            'code' => 200,
+            'data' =>  $user->attributes
+        ];
+        return $result;
     }
 }

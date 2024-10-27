@@ -5,10 +5,11 @@ namespace app\controllers;
 use app\models\Products;
 use app\models\User;
 use Yii;
+use yii\rest\ActiveController;
 use yii\filters\auth\HttpBearerAuth;
 
 
-class ProductController extends \yii\rest\Controller
+class ProductController extends  ActiveController
 {
 
     public  $enableCsrfValidation = false;
@@ -54,15 +55,15 @@ class ProductController extends \yii\rest\Controller
     }
 
 
-    public function actionOptions()
-    {
-        Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
-        Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        Yii::$app->response->headers->set('Access-Control-Allow-Credentials', 'true'); // если нужно отправлять куки или токен
-        Yii::$app->response->statusCode = 200;
-    }
-    
+    // public function actionOptions()
+    // {
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Origin', '*');
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    //     Yii::$app->response->headers->set('Access-Control-Allow-Credentials', 'true'); // если нужно отправлять куки или токен
+    //     Yii::$app->response->statusCode = 200;
+    // }
+
 
     public function actions()
     {
@@ -72,7 +73,7 @@ class ProductController extends \yii\rest\Controller
         unset($actions['delete'], $actions['create']);
 
         // customize the data provider preparation with the "prepareDataProvider()" method
-        $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
+        // $actions['index']['prepareDataProvider'] = [$this, 'prepareDataProvider'];
 
         return $actions;
     }
