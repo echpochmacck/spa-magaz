@@ -127,6 +127,10 @@ class OrdersController extends \yii\rest\ActiveController
             }
         } else {
             Yii::$app->response->statusCode = 404;
+            $result = [
+                'error' => 'NotFounbnd',
+                'code' => 404
+            ];
         }
         return $result;
     }

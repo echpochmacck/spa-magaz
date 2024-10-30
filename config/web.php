@@ -91,6 +91,8 @@ $config = [
                 'OPTIONS api/user/info' => 'user/options',
                 'GET api/user/info' => 'user/user-info',
 
+
+                'OPTIONS api/user/logout' => 'user/options',
                 'GET api/user/logout' => 'user/logout',
 
                 // получение товаров для главной страницы
