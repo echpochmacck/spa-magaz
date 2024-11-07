@@ -11,6 +11,8 @@ use Yii;
  * @property string $title
  * @property string $description
  * @property float $price
+ * @property int $base_quantity
+ * 
  *
  * @property BasketSostav[] $basketSostavs
  * @property Sostav[] $sostavs
@@ -33,7 +35,7 @@ class Products extends \yii\db\ActiveRecord
         return [
             [['title', 'description', 'price'], 'required'],
             [['description'], 'string'],
-            [['price'], 'number'],
+            [['price', 'base_quantity'], 'number'],
             [['title'], 'string', 'max' => 255],
         ];
     }
@@ -76,6 +78,7 @@ class Products extends \yii\db\ActiveRecord
         $product = Products::find()
             ->select('*')
             ->asArray()
+            ->where('base_quantity > 0')
             ->all();
         return $product;
     }

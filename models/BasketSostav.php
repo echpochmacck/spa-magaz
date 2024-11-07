@@ -80,4 +80,14 @@ class BasketSostav extends \yii\db\ActiveRecord
             ->asArray()
             ->all();
     }
+
+    // public static function getForBasketProducts($basket_id)
+    // {
+    //     return Self::find()
+    //         ->select(['products.*', 'quantity'])
+    //         ->innerJoin('products', 'basketSostav.product_id = products.id')
+    //         ->where(['basket_id' => $basket_id])
+    //         ->asArray()
+    //         ->all();
+    // }
 }

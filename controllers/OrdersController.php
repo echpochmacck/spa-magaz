@@ -58,6 +58,9 @@ class OrdersController extends \yii\rest\ActiveController
                 ],
                 'get-basket' => [
                     'Access-Control-Allow-Credentials' => true,
+                ],
+                'delete-order' => [
+                    'Access-Control-Allow-Credentials' => true,
                 ]
             ]
         ];
@@ -65,7 +68,7 @@ class OrdersController extends \yii\rest\ActiveController
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order', 'get-basket'],
+            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order', 'get-basket', 'delete-order'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -74,7 +77,7 @@ class OrdersController extends \yii\rest\ActiveController
         return $behaviors;
     }
 
-    
+
 
 
     public function actions()
@@ -209,22 +212,35 @@ class OrdersController extends \yii\rest\ActiveController
                 $order = new Orders();
                 $order->user_id = $user->id;
                 $order->sum = Orders::getSum($products);
-                $order->status = 'В ожидании';
+                $order->status = 'Новый';
                 $order->save(false);
                 $user->cash = $user->cash - $order->sum;
                 $user->save(false);
                 foreach ($products as $product) {
+                    if ($product['quantity'] > $product['base_quantity']) {
+                        Yii::$app->response->statusCode = 401;
+                        $result = [
+                            'code' => 403,
+                            'errors' => 'товара такого количества нет на складе заказ отмене'
+                        ];
+                        return $result;
+                    }
                     $model = new Sostav();
                     $model->product_id = $product['id'];
                     $model->quantity = $product['quantity'];
+                    $model_product = Products::findOne([$product['id']]);
+                    $model_product->base_quantity = $model_product->base_quantity - $product['quantity'];
                     $model->order_id = $order->id;
+                    $model_product->save(false);
                     $model->save(false);
                 }
                 $basket->delete();
+                // $order->save(false);
                 $result = [
                     'code' => 200,
                 ];
             } else {
+                Yii::$app->response->statusCode = 401;
                 $result = [
                     'code' => 401,
                     'errors' => 'не зватает кэша'
@@ -245,15 +261,43 @@ class OrdersController extends \yii\rest\ActiveController
         if ($basket) {
             $result = [
                 'code' => 200,
-                'data' => ['products' => BasketSostav::getProducts($basket->id)]
+                'data' => ['products' => BasketSostav::getProducts($basket->id)],
+                'cash' => Yii::$app->user->identity->cash
+
             ];
         } else {
+            Yii::$app->response->statusCode = 404;
             $result = [
                 'code' => 404,
-                'error' => 'not found'
+                'error' => 'not found',
+                'cash' => Yii::$app->user->identity->cash
             ];
         }
 
+        return $result;
+    }
+
+    public function actionDeleteOrder($order_id)
+    {
+        $order = Orders::findOne($order_id);
+        $result = [];
+        // var_dump('dsds');die;
+        if ($order) {
+            if ($order->user_id == Yii::$app->user->identity->id) {
+                $order->delete(false);
+                Yii::$app->response->statusCode = 204;
+            } else {
+                $result = [
+                    'code' => 401,
+                    'error' => 'prohibitted for you'
+                ];
+            }
+        } else {
+            $result = [
+                'code' => 401,
+                'error' => 'prohibitted for you'
+            ];
+        }
         return $result;
     }
 }

@@ -108,6 +108,7 @@ $config = [
 
                 'GET api/orders/<order_id>' => 'orders/get-order',
                 'OPTIONS api/orders/<order_id>' => 'orders/options',
+                'DELETE api/orders/<order_id>' => 'orders/delete-order',
 
 
                 // добавление товара в карзину
