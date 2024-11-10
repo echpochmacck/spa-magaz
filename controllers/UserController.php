@@ -79,7 +79,7 @@ class UserController extends \yii\rest\ActiveController
             $model->register();
             Yii::$app->response->statusCode = 201;
             $result = [
-                'code' => 201,  
+                'code' => 201,
                 'data' => [
                     'token' => $model->token,
                     'isAdmin' => $model->isAdmin
@@ -151,5 +151,16 @@ class UserController extends \yii\rest\ActiveController
             'data' =>  $user->attributes
         ];
         return $result;
+    }
+    public function actionGetFile($file_name)
+    {
+        // var_dump('dfdf');die;
+        if (file_exists("../src/$file_name")) {
+            Yii::$app->response->statusCode = 200;
+            Yii::$app->response->sendFile("../src/$file_name")->send();
+        } else {
+            Yii::$app->response->statusCode = 404;
+            Yii::$app->response->send();
+        }
     }
 }

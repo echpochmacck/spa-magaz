@@ -12,6 +12,8 @@ use Yii;
  * @property string $description
  * @property float $price
  * @property int $base_quantity
+ * @property int $file_id
+ * 
  * 
  *
  * @property BasketSostav[] $basketSostavs
@@ -19,6 +21,8 @@ use Yii;
  */
 class Products extends \yii\db\ActiveRecord
 {
+
+    public $file_name = '';
     /**
      * {@inheritdoc}
      */
@@ -76,16 +80,17 @@ class Products extends \yii\db\ActiveRecord
     public static function getProducts()
     {
         $product = Products::find()
-            ->select('*')
+            ->select(['products.*', 'file.name as file_name'])
+            ->leftJoin('file', 'file.id = file_id')
             ->asArray()
             ->where('base_quantity > 0')
             ->all();
         return $product;
     }
 
-    // public static function getProduct($product_id)
-    // {
-    //     $product = Products::findOne($product_id);
-    //     return $product->attributes();
-    // }
+    public static function getProduct($product_id)
+    {
+        $product = Products::findOne($product_id);
+        return $product->attributes();
+    }
 }

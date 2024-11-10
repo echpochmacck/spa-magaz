@@ -189,4 +189,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     {
         return $this->role_id === Role::getRoleId('admin');
     }
+
+
+   
 }

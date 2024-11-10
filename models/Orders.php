@@ -10,7 +10,7 @@ use yii\data\ActiveDataProvider;
  *
  * @property int $id
  * @property int $user_id
- * @property string $status
+ * @property int $status_id
  * @property string $order_date
  * @property float|null $sum
  *
@@ -37,7 +37,7 @@ class Orders extends \yii\db\ActiveRecord
             [['user_id'], 'integer'],
             [['order_date'], 'safe'],
             [['sum'], 'number'],
-            [['status'], 'string', 'max' => 255],
+            [['status_id'], 'ineger'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -50,7 +50,7 @@ class Orders extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'user_id' => 'User ID',
-            'status' => 'Status',
+            'status_id' => 'Status',
             'order_date' => 'Order Date',
             'sum' => 'Sum',
         ];
@@ -79,7 +79,8 @@ class Orders extends \yii\db\ActiveRecord
     public static function getOrders($id)
     {
         $query = Self::find()
-            ->select('*')
+            ->select(['orders.*', 'statuses.title as status_title'])
+            ->innerJoin('statuses', 'orders.status_id = statuses.id')
             ->where(['user_id' => $id])
             // ->asArray()
             // ->all()
@@ -95,7 +96,9 @@ class Orders extends \yii\db\ActiveRecord
     public function getOrderInfo()
     {
         return Sostav::find()
-            ->select('*')
+            ->select(['orders.*', 'statuses.title as status_title'])
+            ->innerJoin('orders', 'orders.id = sostav.order_id')
+            ->innerJoin('statuses', 'orders.status_id = statuses.id')
             ->where(['order_id' => $this->id])
             ->asArray()
             ->all()

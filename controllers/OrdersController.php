@@ -7,6 +7,7 @@ use app\models\BasketSostav;
 use app\models\Orders;
 use app\models\Products;
 use app\models\Sostav;
+use app\models\Statuses;
 use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
@@ -61,14 +62,17 @@ class OrdersController extends \yii\rest\ActiveController
                 ],
                 'delete-order' => [
                     'Access-Control-Allow-Credentials' => true,
-                ]
+                ],
+                'remove-position' => [
+                    'Access-Control-Allow-Credentials' => true,
+                ],
             ]
         ];
 
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order', 'get-basket', 'delete-order'],
+            'only' => ['get-order-list', 'get-order', 'basket', 'remove-basket', 'make-order', 'get-basket', 'delete-order', 'remove-position'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -201,6 +205,29 @@ class OrdersController extends \yii\rest\ActiveController
         return $result;
     }
 
+    public function actionRemovePosition()
+    {
+        $data = Yii::$app->request->post();
+        $product = Products::findOne($data['product_id']);
+        $basket = Basket::findOne(['user_id' => Yii::$app->user->identity->id]);
+        $basketSostav = BasketSostav::findOne(['basket_id' => $basket->id, 'product_id' => $product->id]);
+        if ($product && $basket && $basketSostav) {
+            $basketSostav->delete(false);
+            $result = [
+                'code' => 200,
+                'data' => [
+                    'products' => BasketSostav::getProducts($basket->id)
+                ]
+            ];
+        } else {
+            $result = [
+                'code' => 404,
+                'error' => 'нет такого продукта'
+            ];
+        }
+        return $result;
+    }
+
     public function actionMakeOrder()
     {
         $data = Yii::$app->request->post();
@@ -212,7 +239,7 @@ class OrdersController extends \yii\rest\ActiveController
                 $order = new Orders();
                 $order->user_id = $user->id;
                 $order->sum = Orders::getSum($products);
-                $order->status = 'Новый';
+                $order->status_id = Statuses::getStatusId('Новый');
                 $order->save(false);
                 $user->cash = $user->cash - $order->sum;
                 $user->save(false);

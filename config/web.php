@@ -91,6 +91,9 @@ $config = [
                 'OPTIONS api/user/info' => 'user/options',
                 'GET api/user/info' => 'user/user-info',
 
+                'GET api/file/<file_name>' => 'file/get-file',
+
+
 
                 'OPTIONS api/user/logout' => 'user/options',
                 'GET api/user/logout' => 'user/logout',
@@ -123,9 +126,12 @@ $config = [
                 'OPTIONS api/order/basket/remove' => 'orders/options',
                 'POST api/order/basket/remove' => 'orders/remove-basket',
 
+
+                'OPTIONS api/order/basket/removePosition' => 'orders/options',
+                'POST api/order/basket/removePosition' => 'orders/remove-position',
+
                 'OPTIONS api/order/make' => 'orders/options',
                 'GET api/order/make' => 'orders/make-order',
-
 
 
                 // админка
@@ -135,6 +141,8 @@ $config = [
                 'GET api/admin/order' => 'admin/get-order-info',
                 'PATCH api/admin/order' => 'admin/change-status',
                 'OPTIONS api/admin/order' => 'admin/options',
+
+
 
 
 
