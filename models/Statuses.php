@@ -60,4 +60,12 @@ class Statuses extends \yii\db\ActiveRecord
     {
         return self::findOne(['title' => $status])->id;
     }
+
+    public static function getStatuses()
+    {
+        return Self::find()
+                ->select(['id','title'])
+                ->asArray()
+                ->all();
+    }
 }

@@ -138,15 +138,13 @@ $config = [
                 'GET api/admin/orders' => 'admin/get-orders',
                 'OPTIONS api/admin/orders' => 'admin/options',
 
-                'GET api/admin/order' => 'admin/get-order-info',
-                'PATCH api/admin/order' => 'admin/change-status',
-                'OPTIONS api/admin/order' => 'admin/options',
+                'GET api/admin/statuses' => 'admin/get-statuses',
+                'OPTIONS api/admin/statuses' => 'admin/options',
 
+                // 'GET api/admin/order' => 'admin/get-order-info',
+                'OPTIONS api/admin/order/<order_id>' => 'admin/options',
+                'PATCH api/admin/order/<order_id>' => 'admin/change-status',
 
-
-
-
-                
 
             ],
         ]

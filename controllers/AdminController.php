@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Orders;
+use app\models\Statuses;
 use app\models\User;
 use Yii;
 use yii\filters\auth\HttpBearerAuth;
@@ -32,12 +33,22 @@ class AdminController extends \yii\rest\ActiveController
                 // restrict access to
                 'Origin' => [(isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : 'http://' . $_SERVER['REMOTE_ADDR'])],
                 // Allow only POST and PUT methods
-                'Access-Control-Request-Method' => ['POST', 'GET', 'OPTIONS'],
+                'Access-Control-Request-Method' => ['POST', 'GET', 'OPTIONS', 'PATCH'],
                 // Allow only headers 'X-Wsse'
                 'Access-Control-Request-Headers' => ['Content-type', 'Authorization'],
             ],
             'actions' => [
                 'get-orders' => [
+                    'Access-Control-Allow-Credentials' => true,
+
+                ],
+                'get-order-info' => [
+                    'Access-Control-Allow-Credentials' => true,
+
+                ],'change-status' => [
+                    'Access-Control-Allow-Credentials' => true,
+
+                ],'get-statuses' => [
                     'Access-Control-Allow-Credentials' => true,
 
                 ]
@@ -47,7 +58,7 @@ class AdminController extends \yii\rest\ActiveController
 
         $auth = [
             'class' => HttpBearerAuth::class,
-            'only' => ['get-orders', 'get-order-info', 'change-status'],
+            'only' => ['get-orders', 'get-order-info', 'change-status', 'get-statuses'],
         ];
         // re-add authentication filter
         $behaviors['authenticator'] = $auth;
@@ -129,8 +140,7 @@ class AdminController extends \yii\rest\ActiveController
             $order = Orders::findOne($order_id);
             if ($order) {
                 $data = Yii::$app->request->post();
-                $order->status = $data['status'];
-                if ($order->validate()) {
+                $order->status_id = Statuses::getStatusId($data['status']);
                     $order->save(false);
                     Yii::$app->response->statusCode = 200;
                     $result = [
@@ -139,15 +149,7 @@ class AdminController extends \yii\rest\ActiveController
                             'order' => $order->attributes
                         ]
                     ];
-                } else {
-                    Yii::$app->response->statusCode = 402;
-                    $result = [
-                        'code' => 402,
-                        'errors' => [
-                            $order->errors
-                        ]
-                    ];
-                }
+               
             } else {
                 Yii::$app->response->statusCode = 404;
                 $result = [
@@ -157,6 +159,24 @@ class AdminController extends \yii\rest\ActiveController
             }
         } else {
 
+            Yii::$app->response->statusCode = 401;
+            $result = [
+                'code' => 401,
+                'error' => 'Prohibitted for you'
+            ];
+        }
+        return $result;
+    }
+    public function actionGetStatuses()
+    {
+        $user = User::findOne(Yii::$app->user->identity->id);
+        if ($user->isAdmin) {
+            Yii::$app->response->statusCode = 200;
+            $result = [
+                'code' => 401,
+                'data' =>  Statuses::getStatuses()
+            ];
+        } else {
             Yii::$app->response->statusCode = 401;
             $result = [
                 'code' => 401,

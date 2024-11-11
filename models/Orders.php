@@ -119,9 +119,11 @@ class Orders extends \yii\db\ActiveRecord
         return self::find()
             ->select([
                 'orders.*',
+                'statuses.title as status_title',
                 'login',
             ])
             ->innerJoin('user', 'user.id = orders.user_id')
+            ->innerJoin('statuses', 'statuses.id = orders.status_id')
             ->asArray()
             ->all()
         ;
